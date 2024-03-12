@@ -8,8 +8,7 @@ from board import SCL, SDA
 from adafruit_pca9685 import PCA9685
 from adafruit_motor import servo
 from pick import pick
-import os
-import sys
+
 
 # Length of each link in the manipulator
 l1 = 122  # Length of link 1
@@ -75,11 +74,6 @@ i2c = busio.I2C(SCL, SDA)
 pca = PCA9685(i2c)
 pca.frequency = 60
 
-# Function to move servos to specified angles
-def move_servos(angle1, angle2):
-    kit.servo[0].angle = angle1
-    kit.servo[1].angle = angle2
-
 # Bezier curve calculation function
 def bezier(t, points):
     n = len(points) - 1
@@ -93,14 +87,13 @@ def bezier(t, points):
 if __name__ == "__main__":
     try:
         # Define the Bezier curve control points
-        points = [(-221, 177), (-154, 200), (-124, 10), (-200, 0)]
+        points = [(-200, 170), (-154, 200), (-124, 10), (-200, 0)]
 
         # Iterate over time (t) to interpolate positions along the curve
         for t in range(0, 101, 1):
             t /= 100  # Normalize t to [0, 1]
             x, y = bezier(t, points)
-
-            # Calculate servo angles using inverse kinematics
+        # Calculate servo angles using inverse kinematics
             servo1_angle, servo2_angle = inverse_kinematics(x, y)
 
             if servo1_angle is not None and servo2_angle is not None:
@@ -111,15 +104,21 @@ if __name__ == "__main__":
                 # Set up PCA9685 servo controller
                 active_servo1 = servo.Servo(pca.channels[0])
                 active_servo2 = servo.Servo(pca.channels[1])
+                active_servo3 = servo.Servo(pca.channels[2])
+                active_servo4 = servo.Servo(pca.channels[3])
 
                 # Set pulse width range for servos
-                active_servo1.set_pulse_width_range(min_pulse=500, max_pulse=2500)
-                active_servo2.set_pulse_width_range(min_pulse=500, max_pulse=1500)
+                active_servo1.set_pulse_width_range(min_pulse=500, max_pulse=2600)
+                active_servo2.set_pulse_width_range(min_pulse=100, max_pulse=2300)
+                active_servo3.set_pulse_width_range(min_pulse=500, max_pulse=2600)
+                active_servo4.set_pulse_width_range(min_pulse=100, max_pulse=2300)
 
                 # Move servos to calculated angles
                 active_servo1.angle = servo1_angle
+                active_servo3.angle = servo1_angle
                 time.sleep(0.001)
                 active_servo2.angle = servo2_angle
+                active_servo4.angle = servo2_angle
                 time.sleep(0.001)
 
     except KeyboardInterrupt:
