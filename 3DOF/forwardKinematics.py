@@ -236,8 +236,8 @@ if __name__ == "__main__":
         foot_servo_RB.set_pulse_width_range(min_pulse=500, max_pulse=2500)
 
         
-        omega = 0 #yaw
-        phi = 0 #roll
+        omega = 0.0 #yaw
+        phi = 0.1 #roll
         psi = 0 #pitch
 
         xm = 0
@@ -246,6 +246,7 @@ if __name__ == "__main__":
 
         FP=[0,0,0,1]
 
+        
 
         # Invert local X
         Ix=np.array([[-1,0,0,0],[0,1,0,0],[0,0,1,0],[0,0,0,1]])
@@ -254,48 +255,62 @@ if __name__ == "__main__":
         (Tlf,Trf,Tlb,Trb,Tm) = bodyIK(omega,phi,psi,xm,ym,zm)
         CP=[x@FP for x in [Tlf,Trf,Tlb,Trb]]
 
-        pr = [0,-150,0,1]
-        pl = [0,-150,0,1]
+        pr = [0,-130,0,1]
+        pl = [0,-130,0,1]
 
-        prf = Trf@pr
-        prb = Trb@pr
-        plf = Tlf@pl
-        plb = Tlb@pl
+        while True:
+            stdscr.clear()
+            stdscr.addstr(0, 0, "Use arrow keys to move. Press q to quit.")
+            print("here")
+            key = stdscr.getch()
+            if key == curses.KEY_RIGHT:
+                if omega > 0.5:
+                    omega = omega - 0.01
+            elif key == curses.KEY_LEFT:
+                if omega > 0.5:
+                    omega = omega + 0.01
+            elif key == ord("q"):
+                break
 
-        plf = np.linalg.inv(Tlf) @ Lp[0]
-        plb = np.linalg.inv(Tlb) @ Lp[1]
-        prf = Ix @ np.linalg.inv(Trf) @ Lp[2]
-        prb = Ix @ np.linalg.inv(Trb) @ Lp[3]
+            prf = Trf@pr
+            prb = Trb@pr
+            plf = Tlf@pl
+            plb = Tlb@pl
 
-        foot_LF, leg_LF, shoulder_LF,a,b,c = LeftLegIK(plf[0],plf[1],plf[2])
-        a,b,c,foot_LB, leg_LB, shoulder_LB = LeftLegIK(plb[0],plb[1],plb[2])
-        foot_RF, leg_RF, shoulder_RF,a,b,c = RightLegIK(prf[0],prf[1],prf[2])
-        a,b,c,foot_RB, leg_RB, shoulder_RB = RightLegIK(prb[0],prb[1],prb[2])       
+            plf = np.linalg.inv(Tlf) @ Lp[0]
+            plb = np.linalg.inv(Tlb) @ Lp[1]
+            prf = Ix @ np.linalg.inv(Trf) @ Lp[2]
+            prb = Ix @ np.linalg.inv(Trb) @ Lp[3]
 
-        
-        
-        if foot_LF is not None and leg_LF is not None and shoulder_LF is not None and foot_LB is not None and leg_LB is not None and shoulder_LB is not None and foot_RF is not None and leg_RF is not None and shoulder_RF is not None and foot_RB is not None and leg_RB is not None and shoulder_RB is not None:
-            # print("FootLF angle:{}, LegLF angle:{},ShoulderLF angle:{}".format(foot_LF,leg_LF,shoulder_LF))
-            # print("FootLB angle:{}, LegLB angle:{},ShoulderLB angle:{}".format(foot_LB,leg_LB,shoulder_LB))
-            # print("FootRF angle:{}, LegRF angle:{},ShoulderRF angle:{}".format(foot_RF,leg_RF,shoulder_RF))
-            # print("FootRB angle:{}, LegRB angle:{},ShoulderRB angle:{}".format(foot_RB,leg_RB,shoulder_RB)
-            # Move Left Front servos to calculated angles
-            shoulder_servo_LF.angle = shoulder_LF
-            leg_servo_LF.angle = leg_LF 
-            foot_servo_LF.angle = foot_LF
-            # # Move Left Back servos to calculated angles
-            shoulder_servo_LB.angle = shoulder_LB 
-            leg_servo_LB.angle = leg_LB
-            foot_servo_LB.angle = foot_LB
+            foot_LF, leg_LF, shoulder_LF,a,b,c = LeftLegIK(plf[0],plf[1],plf[2])
+            a,b,c,foot_LB, leg_LB, shoulder_LB = LeftLegIK(plb[0],plb[1],plb[2])
+            foot_RF, leg_RF, shoulder_RF,a,b,c = RightLegIK(prf[0],prf[1],prf[2])
+            a,b,c,foot_RB, leg_RB, shoulder_RB = RightLegIK(prb[0],prb[1],prb[2])       
+
+            
+            
+            if foot_LF is not None and leg_LF is not None and shoulder_LF is not None and foot_LB is not None and leg_LB is not None and shoulder_LB is not None and foot_RF is not None and leg_RF is not None and shoulder_RF is not None and foot_RB is not None and leg_RB is not None and shoulder_RB is not None:
+                # print("FootLF angle:{}, LegLF angle:{},ShoulderLF angle:{}".format(foot_LF,leg_LF,shoulder_LF))
+                # print("FootLB angle:{}, LegLB angle:{},ShoulderLB angle:{}".format(foot_LB,leg_LB,shoulder_LB))
+                # print("FootRF angle:{}, LegRF angle:{},ShoulderRF angle:{}".format(foot_RF,leg_RF,shoulder_RF))
+                # print("FootRB angle:{}, LegRB angle:{},ShoulderRB angle:{}".format(foot_RB,leg_RB,shoulder_RB)
+                # Move Left Front servos to calculated angles
+                shoulder_servo_LF.angle = shoulder_LF
+                leg_servo_LF.angle = leg_LF 
+                foot_servo_LF.angle = foot_LF
+                # # Move Left Back servos to calculated angles
+                shoulder_servo_LB.angle = shoulder_LB 
+                leg_servo_LB.angle = leg_LB
+                foot_servo_LB.angle = foot_LB
+                        
+                # Move Right Front servos to calculated angles
+                shoulder_servo_RF.angle = shoulder_RF
+                leg_servo_RF.angle = leg_RF 
+                foot_servo_RF.angle = foot_RF 
                     
-            # Move Right Front servos to calculated angles
-            shoulder_servo_RF.angle = shoulder_RF
-            leg_servo_RF.angle = leg_RF 
-            foot_servo_RF.angle = foot_RF 
-                
-            # Move Right Back servos to calculated angles
-            shoulder_servo_RB.angle = shoulder_RB
-            leg_servo_RB.angle = leg_RB
-            foot_servo_RB.angle = foot_RB
+                # Move Right Back servos to calculated angles
+                shoulder_servo_RB.angle = shoulder_RB
+                leg_servo_RB.angle = leg_RB
+                foot_servo_RB.angle = foot_RB
     except KeyboardInterrupt:
         pass

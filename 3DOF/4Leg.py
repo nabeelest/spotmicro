@@ -34,47 +34,42 @@ leg_offset_RB = -10
 shoulder_offset_RB = 10
 
 
-# Inverse Kinematics for Left Legs function
 def LeftLegIK(x, y, z):
     try:
 
         # Constant lengths in mm
-        upper_leg = 120
-        lower_leg = 120
+        l3 = 120
+        l4 = 120
+        l2 = 0
         shoulder_leg = 60
 
-        y1 = sqrt(y * y + z * z - shoulder_leg * shoulder_leg)
+        F=sqrt(x**2+y**2-shoulder_leg**2)
+        G=F-l2  
+        H=sqrt(G**2+z**2)
+        theta1=-atan2(y,x)-atan2(F,-l2)
 
-        distance = sqrt(x * x + y1 * y1)
+        D=(H**2-l3**2-l4**2)/(2*l3*l4)
+        theta3=acos(D) 
 
-        foot = acos(
-            (distance * distance - upper_leg * upper_leg - lower_leg * lower_leg)
-            / (-2 * upper_leg * lower_leg)
-        )
+        theta2=atan2(z,G)-atan2(l4*sin(theta3),l3+l4*cos(theta3))
 
-        leg = asin((lower_leg * sin(foot)) / distance) - (atan(x / y) if y != 0 else 0)
+        shoulder_leg = theta1
+        leg = -theta2
+        foot = theta3
 
-        shoulder_leg = atan(distance / shoulder_leg) + atan(z / y)
 
         # Convert radians to degrees and add servo offsets
-        foot_LF = (foot / pi * 180) + foot_offset_LF
-        leg_LF = (leg / pi * 180) + leg_offset_LF
-        shoulder_LF = 180 - (shoulder_leg / pi * 180) + shoulder_offset_LF
+        foot_LF =  180 - (foot/pi * 180) + foot_offset_LF
+        leg_LF = (leg/pi * 180) + leg_offset_LF
+        shoulder_LF = 180 - (shoulder_leg/pi * 180) + shoulder_offset_LF
 
         # Left Back
-        foot_LB = (foot / pi * 180) + foot_offset_LB
-        leg_LB = (leg / pi * 180) + leg_offset_LB
-        shoulder_LB = 180 - (shoulder_leg / pi * 180) + shoulder_offset_LB
+        foot_LB = 180 - (foot/pi * 180) + foot_offset_LB
+        leg_LB = (leg/pi * 180) + leg_offset_LB
+        shoulder_LB = 180 - (shoulder_leg/pi * 180) + shoulder_offset_LB
 
         # Check if angles are within servo limits
-        if (
-            (servo_min <= foot_LF <= servo_max)
-            and (servo_min <= leg_LF <= servo_max)
-            and (servo_min <= shoulder_LF <= servo_max)
-            and (servo_min <= foot_LB <= servo_max)
-            and (servo_min <= leg_LB <= servo_max)
-            and (servo_min <= shoulder_LB <= servo_max)
-        ):
+        if (servo_min <= foot_LF <= servo_max) and (servo_min <= leg_LF <= servo_max) and (servo_min <= shoulder_LF <= servo_max) and (servo_min <= foot_LB <= servo_max) and (servo_min <= leg_LB <= servo_max) and (servo_min <= shoulder_LB <= servo_max):
             return foot_LF, leg_LF, shoulder_LF, foot_LB, leg_LB, shoulder_LB
         else:
             print("Error: Servo angles are out of bounds")
@@ -83,11 +78,11 @@ def LeftLegIK(x, y, z):
             print("LegLF angle:", leg_LF)
             print("ShoulderLF angle:", shoulder_LF)
 
-            print("FootLB angle:", foot_LB)
-            print("LegLB angle:", leg_LB)
-            print("ShoulderLB angle:", shoulder_LB)
+            # print("FootLB angle:", foot_LB)
+            # print("LegLB angle:", leg_LB)
+            # print("ShoulderLB angle:", shoulder_LB)
             return None, None, None, None, None, None
-
+        
     except ValueError as e:
         print("Error:", e)
         return None, None, None, None, None, None
@@ -98,53 +93,48 @@ def RightLegIK(x, y, z):
     try:
 
         # Constant lengths in mm
-        upper_leg = 120
-        lower_leg = 120
+        l3 = 120
+        l4 = 120
+        l2 = 0
         shoulder_leg = 60
 
-        y1 = sqrt(y * y + z * z - shoulder_leg * shoulder_leg)
+        F=sqrt(x**2+y**2-shoulder_leg**2)
+        G=F-l2  
+        H=sqrt(G**2+z**2)
+        theta1=-atan2(y,x)-atan2(F,-l2)
 
-        distance = sqrt(x * x + y1 * y1)
+        D=(H**2-l3**2-l4**2)/(2*l3*l4)
+        theta3=acos(D) 
 
-        foot = acos(
-            (distance * distance - upper_leg * upper_leg - lower_leg * lower_leg)
-            / (-2 * upper_leg * lower_leg)
-        )
+        theta2=atan2(z,G)-atan2(l4*sin(theta3),l3+l4*cos(theta3))
 
-        leg = asin((lower_leg * sin(foot)) / distance) - (atan(x / y) if y != 0 else 0)
-
-        shoulder_leg = atan(distance / shoulder_leg) + atan(z / y)
+        shoulder_leg = theta1
+        leg = -theta2
+        foot = theta3
 
         # Convert radians to degrees and add servo offsets
-        foot_RF = 180 - (foot / pi * 180) + foot_offset_RF
-        leg_RF = 180 - (leg / pi * 180) + leg_offset_RF
-        shoulder_RF = (shoulder_leg / pi * 180) + shoulder_offset_RF
+        foot_RF =  (foot/pi * 180) + foot_offset_RF
+        leg_RF = 180 - (leg/pi * 180) + leg_offset_RF
+        shoulder_RF = (shoulder_leg/pi * 180) + shoulder_offset_RF
 
         # Left Back
-        foot_RB = 180 - (foot / pi * 180) + foot_offset_RB
-        leg_RB = 180 - (leg / pi * 180) + leg_offset_RB
-        shoulder_RB = (shoulder_leg / pi * 180) + shoulder_offset_RB
+        foot_RB =  (foot/pi * 180) + foot_offset_RB
+        leg_RB = 180 - (leg/pi * 180) + leg_offset_RB
+        shoulder_RB =  (shoulder_leg/pi * 180) + shoulder_offset_RB
 
         # Check if angles are within servo limits
-        if (
-            (servo_min <= foot_RF <= servo_max)
-            and (servo_min <= leg_RF <= servo_max)
-            and (servo_min <= shoulder_RF <= servo_max)
-            and (servo_min <= foot_RB <= servo_max)
-            and (servo_min <= leg_RB <= servo_max)
-            and (servo_min <= shoulder_RB <= servo_max)
-        ):
+        if (servo_min <= foot_RF <= servo_max) and (servo_min <= leg_RF <= servo_max) and (servo_min <= shoulder_RF <= servo_max) and (servo_min <= foot_RB <= servo_max) and (servo_min <= leg_RB <= servo_max) and (servo_min <= shoulder_RB <= servo_max):
             return foot_RF, leg_RF, shoulder_RF, foot_RB, leg_RB, shoulder_RB
         else:
             print("Error: Servo angles are out of bounds")
             print("Moving to ({}, {}, {})".format(x, y, z))
-            print("FootRF angle:", foot_RF)
-            print("LegRF angle:", leg_RF)
-            print("ShoulderRF angle:", shoulder_RF)
+            print("FootLF angle:", foot_RF)
+            print("LegLF angle:", leg_RF)
+            print("ShoulderLF angle:", shoulder_RF)
 
-            print("FootRB angle:", foot_RB)
-            print("LegRB angle:", leg_RB)
-            print("ShoulderRB angle:", shoulder_RB)
+            # print("FootLB angle:", foot_RB)
+            # print("LegLB angle:", leg_RB)
+            # print("ShoulderLB angle:", shoulder_RB)
             return None, None, None, None, None, None
 
     except ValueError as e:
@@ -206,8 +196,8 @@ if __name__ == "__main__":
         foot_servo_RB.set_pulse_width_range(min_pulse=500, max_pulse=2500)
 
         x = 0
-        y = 150
-        z = 60
+        y = -150
+        z = 0
 
         while True:
             stdscr.clear()

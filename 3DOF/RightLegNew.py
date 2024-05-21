@@ -114,7 +114,7 @@ if __name__ == "__main__":
         foot_servo_RB.set_pulse_width_range(min_pulse=500, max_pulse=2500)
 
         x = 0
-        y = -130
+        y = -150
         z = 0
 
         
